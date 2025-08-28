@@ -14,7 +14,199 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      classes: {
+        Row: {
+          created_at: string
+          grade: string
+          id: string
+          name: string
+          school_level: string
+          shift: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          grade: string
+          id?: string
+          name: string
+          school_level: string
+          shift: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          grade?: string
+          id?: string
+          name?: string
+          school_level?: string
+          shift?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      schedule_configs: {
+        Row: {
+          break_end: string
+          break_start: string
+          class_duration: number
+          classes_per_day: number
+          created_at: string
+          end_time: string
+          id: string
+          name: string
+          shift: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          break_end?: string
+          break_start?: string
+          class_duration?: number
+          classes_per_day?: number
+          created_at?: string
+          end_time?: string
+          id?: string
+          name?: string
+          shift: string
+          start_time?: string
+          updated_at?: string
+        }
+        Update: {
+          break_end?: string
+          break_start?: string
+          class_duration?: number
+          classes_per_day?: number
+          created_at?: string
+          end_time?: string
+          id?: string
+          name?: string
+          shift?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      schedule_entries: {
+        Row: {
+          class_id: string
+          created_at: string
+          day_of_week: number
+          id: string
+          schedule_id: string
+          subject: string
+          teacher_id: string
+          time_slot: number
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          day_of_week: number
+          id?: string
+          schedule_id: string
+          subject: string
+          teacher_id: string
+          time_slot: number
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          day_of_week?: number
+          id?: string
+          schedule_id?: string
+          subject?: string
+          teacher_id?: string
+          time_slot?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_entries_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_entries_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          conflicts: number | null
+          created_at: string
+          generated_by: string | null
+          id: string
+          name: string
+          schedule_data: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          conflicts?: number | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          name: string
+          schedule_data: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          conflicts?: number | null
+          created_at?: string
+          generated_by?: string | null
+          id?: string
+          name?: string
+          schedule_data?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      teachers: {
+        Row: {
+          constraints: Json | null
+          created_at: string
+          id: string
+          max_daily_classes: number
+          max_weekly_classes: number
+          name: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          constraints?: Json | null
+          created_at?: string
+          id?: string
+          max_daily_classes?: number
+          max_weekly_classes?: number
+          name: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          constraints?: Json | null
+          created_at?: string
+          id?: string
+          max_daily_classes?: number
+          max_weekly_classes?: number
+          name?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
