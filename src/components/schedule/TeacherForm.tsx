@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, User, Clock } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X, Plus, User, Clock, GraduationCap } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +14,14 @@ import { useToast } from "@/hooks/use-toast";
 interface TeacherFormProps {
   onClose: () => void;
   onSave?: () => void;
+}
+
+interface Class {
+  id: string;
+  name: string;
+  grade: string;
+  school_level: string;
+  shift: string;
 }
 
 const TeacherForm = ({ onClose, onSave }: TeacherFormProps) => {
@@ -24,6 +33,31 @@ const TeacherForm = ({ onClose, onSave }: TeacherFormProps) => {
   const [maxDailyClasses, setMaxDailyClasses] = useState("5");
   const [preferences, setPreferences] = useState("");
   const [unavailableSlots, setUnavailableSlots] = useState<string[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [availableClasses, setAvailableClasses] = useState<Class[]>([]);
+
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('classes')
+          .select('*')
+          .order('name');
+        
+        if (error) throw error;
+        setAvailableClasses(data || []);
+      } catch (error) {
+        console.error("Error fetching classes:", error);
+        toast({
+          title: "Erro ao carregar turmas",
+          description: "Não foi possível carregar a lista de turmas.",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchClasses();
+  }, [toast]);
 
   const addSubject = () => {
     if (newSubject.trim() && !subjects.includes(newSubject.trim())) {
@@ -34,6 +68,14 @@ const TeacherForm = ({ onClose, onSave }: TeacherFormProps) => {
 
   const removeSubject = (subject: string) => {
     setSubjects(subjects.filter(s => s !== subject));
+  };
+
+  const handleClassToggle = (classId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedClasses([...selectedClasses, classId]);
+    } else {
+      setSelectedClasses(selectedClasses.filter(id => id !== classId));
+    }
   };
 
   const timeSlots = [
@@ -50,7 +92,8 @@ const TeacherForm = ({ onClose, onSave }: TeacherFormProps) => {
       const constraints = {
         preferences,
         unavailableSlots,
-        subjects
+        subjects,
+        assignedClasses: selectedClasses
       };
 
       const { error } = await supabase
@@ -141,6 +184,35 @@ const TeacherForm = ({ onClose, onSave }: TeacherFormProps) => {
                     />
                   </Badge>
                 ))}
+              </div>
+            </div>
+
+            {/* Turmas que leciona */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4" />
+                Turmas que Leciona
+              </Label>
+              <div className="grid grid-cols-1 gap-3 max-h-48 overflow-y-auto border rounded-md p-3">
+                {availableClasses.length === 0 ? (
+                  <p className="text-muted-foreground text-sm">Nenhuma turma cadastrada</p>
+                ) : (
+                  availableClasses.map((cls) => (
+                    <div key={cls.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`class-${cls.id}`}
+                        checked={selectedClasses.includes(cls.id)}
+                        onCheckedChange={(checked) => handleClassToggle(cls.id, checked as boolean)}
+                      />
+                      <Label 
+                        htmlFor={`class-${cls.id}`} 
+                        className="text-sm font-normal cursor-pointer flex-1"
+                      >
+                        {cls.name} - {cls.grade} ({cls.shift})
+                      </Label>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
