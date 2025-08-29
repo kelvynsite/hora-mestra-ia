@@ -69,15 +69,23 @@ const Dashboard = () => {
     setIsGenerating(true);
 
     try {
+      console.log('Starting schedule generation for shift:', shift);
+      
       const response = await supabase.functions.invoke('generate-schedule', {
         body: { shift }
       });
 
+      console.log('Function response:', response);
+
       if (response.error) throw response.error;
+
+      if (response.data?.error) {
+        throw new Error(response.data.error);
+      }
 
       toast({
         title: "Horário gerado com sucesso!",
-        description: `Horário do turno ${shift === 'morning' ? 'da manhã' : 'da tarde'} foi criado com IA.`,
+        description: response.data?.message || `Horário do turno ${shift === 'morning' ? 'da manhã' : 'da tarde'} foi criado.`,
       });
 
       loadStats();
@@ -86,7 +94,7 @@ const Dashboard = () => {
       console.error('Error generating schedule:', error);
       toast({
         title: "Erro ao gerar horário",
-        description: "Verifique se há professores e turmas cadastrados.",
+        description: error.message || "Verifique se há professores e turmas cadastrados.",
         variant: "destructive",
       });
     } finally {
